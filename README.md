@@ -1,6 +1,9 @@
 # Lidar Speed Detector
 
-Python script to calculate speed of a moving object using a lidar sensor.
+Python script to calculate speed of a moving object using a lidar sensor.  Can be run on Raspberry Pi to create your own low cost speed camera:
+
+![Raspberry Pi with lidar](./docs/rpi.jpg)
+
 
 ## Benewake TF02 Lidar sensor
 ![Benewake TF02 Lidar sensor](./docs/lidar.jpg)
@@ -13,7 +16,7 @@ You'll need a the following:
 - USB-TTL Serial converter adapter
 - PC or Raspberry Pi
 - Docker for devcontainer support
-- WSL 2
+- WSL 2 (pc)
 
 ## Development with devcontainers
 
@@ -24,15 +27,14 @@ Devcontainers make the setup of the Python environment easy for debugging the sc
 In order to read the lidar sensor data, we'll be doing this over the serial port.  Replace the `ttyUSB0` with the relevant port of your device.
 
 1. Attach the sensor via USB-TTL adapter
-1. Expose the [USB device to the WSL 2 environment](https://learn.microsoft.com/en-us/windows/wsl/connect-usb)
-1. Within PowerShell list the available USB devices and attach the relevant sensor device id to wls
+1. Now we need to expose the [USB device to the WSL 2 environment](https://learn.microsoft.com/en-us/windows/wsl/connect-usb).  Within PowerShell list the available USB devices and attach the relevant sensor device id to wls eg:
 
     ```Powershell
         usbipd wsl list
         usbipd wsl attach --busid 1-1
     ```
 
-1. Expose USB device access inside the devcontainer, within [devcontainer.json#L16](.devcontainer/devcontainer.json)
+1. Expose the USB device access inside the devcontainer, within [devcontainer.json#L16](.devcontainer/devcontainer.json) eg:
 
     ```json
         "runArgs": ["--device=/dev/ttyUSB0"],
@@ -41,22 +43,6 @@ In order to read the lidar sensor data, we'll be doing this over the serial port
 ### Debugging
 
 Once the serial device is setup, within the devcontainer you should be able to F5 on main.py, which will start to read sensor data and calculate speed based on the distance readings from the lidar.
-
-When debugging if you see:
-
-    `[Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'`
-
-Whilst trying to open the port eg:
-
-```python
-    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout = 1)
-```
-
-You may need to grant read/write/execute permissions to the USB port eg:
-
-```bash
-    sudo chmod +777 /dev/ttyUSB0
-```
 
 When running when lidar detects movement you should see output in the console eg:
 
@@ -83,4 +69,22 @@ When running when lidar detects movement you should see output in the console eg
  / ___ \ V / (_| |_   / __/| (_) || |__   _| |   <| | | | | | | | |
 /_/   \_\_/ \__, (_) |_____|\___(_)_|  |_|   |_|\_\_| |_| |_|_| |_|
             |___/                                                  
+```
+
+## Troubleshooting
+
+When opening the devcontainer, if you see:
+
+    `An error occurred setting up the container`
+
+Check you have setup and connected the lidar sensor to the USB port.
+
+When debugging if you see:
+
+    `[Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'`
+
+Grant read/write/execute permissions to the USB port eg:
+
+```bash
+    sudo chmod +777 /dev/ttyUSB0
 ```
